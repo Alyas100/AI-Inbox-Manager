@@ -24,3 +24,5 @@ async def auth_callback(request: Request):
     
     return {"email": user_info["email"], "name": user_info["name"], "token": token}
 
+
+# LATER: do function to use the refresh token to request again access token after the access token expired
