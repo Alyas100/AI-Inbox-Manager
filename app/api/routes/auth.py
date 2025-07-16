@@ -7,7 +7,9 @@ router = APIRouter()
 @router.get("/auth/login")
 async def login(request: Request):
     redirect_uri = request.url_for("auth_callback")
-    return await oauth.google.authorize_redirect(request, redirect_uri)
+    # use access_type to get refresh token everytime, not just on first login
+    # use prompt consent for login popup to appear everytime this endpoint is hit
+    return await oauth.google.authorize_redirect(request, redirect_uri, access_type="offline", prompt="consent")
 
 
 @router.get("/auth/google/callback", name="auth_callback")

@@ -7,7 +7,7 @@ oauth.register(
     client_secret='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',
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={
-        'scope': 'openid email profile https://www.googleapis.com/auth/gmail.readonly',
-        'prompt': 'consent'  # force the sign-in popup everytime
+        'scope': 'openid email profile https://www.googleapis.com/auth/gmail.readonly'
+        
     }
 )

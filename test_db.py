@@ -11,9 +11,9 @@ db = SessionLocal()
 
 # Create a new user instance
 new_user = User(
-    email="testuser@example.com",
-    access_token="fake_access_token_123",
-    refresh_token="fake_refresh_token_123"
+    email="alyasmuhd1234@gmail.com",
+    access_token=os.getenv("ACCESS_TOKEN"),
+    refresh_token=os.getenv("REFRESH_TOKEN")
 )
 
 # Add and commit to DB
