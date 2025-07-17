@@ -1,0 +1,7 @@
+
+# ignore python cahce
+__pycache__/
+*.pyc
+
+# environments
+.env
