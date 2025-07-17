@@ -22,7 +22,7 @@ db.commit()
 db.refresh(new_user)  # refresh to get ID and updated fields
 
 # Query the user back
-retrieved_user = db.query(User).filter_by(email="testuser@example.com").first()
+retrieved_user = db.query(User).filter_by(email="alyasmuhd1234@example.com").first()
 
 print("User added and retrieved from DB:")
 print(f"ID: {retrieved_user.id}, Email: {retrieved_user.email}")

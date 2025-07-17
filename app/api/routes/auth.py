@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Request
 from starlette.responses import RedirectResponse
 from app.services.oauth import oauth
+from app.services.email_service import get_emails_for_user
+
 
 router = APIRouter()
 
@@ -28,3 +30,11 @@ async def auth_callback(request: Request):
 
 
 # LATER: do function to use the refresh token to request again access token after the access token expired
+
+
+# testing api func to fetch email 
+@router.get("/test-fetch-emails")
+def test_fetch_emails():
+    email = "alyasmuhd1234@gmail.com"  
+    messages = get_emails_for_user(email)
+    return {"messages": messages}

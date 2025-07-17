@@ -7,6 +7,7 @@ def get_emails_for_user(email):
     db = SessionLocal()
     try:
         user = db.query(User).filter_by(email=email).first()
+        print(user)
         if not user:
             raise Exception("User not found")
 
