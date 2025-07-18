@@ -2,9 +2,25 @@ from fastapi import APIRouter, Request
 from starlette.responses import RedirectResponse
 from app.services.oauth import oauth
 from app.services.email_service import get_emails_for_user
+from app.services.gemini import summarize_with_gemini
+import sqlite3
+
 
 
 router = APIRouter()
+
+
+# function to retrieve user emailthat stored in db
+def get_user_email(user_id: int = 2):
+    conn = sqlite3.connect("test.db")  
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT email FROM users WHERE id = ?", (user_id,))  # Or use WHERE if multiple users
+    row = cursor.fetchone()
+
+    conn.close()
+    return row[0] if row else None
+
 
 @router.get("/auth/login")
 async def login(request: Request):
@@ -32,9 +48,28 @@ async def auth_callback(request: Request):
 # LATER: do function to use the refresh token to request again access token after the access token expired
 
 
-# testing api func to fetch email 
+#testing api func to fetch email 
 @router.get("/test-fetch-emails")
 def test_fetch_emails():
-    email = "alyasmuhd1234@gmail.com"  
+    email = get_user_email()
     messages = get_emails_for_user(email)
     return {"messages": messages}
+
+
+@router.get("/summarize-emails")
+def summarize_emails():
+    email = get_user_email()
+    messages = get_emails_for_user(email)
+
+    # Format the emails into a string Gemini can summarize
+    combined_messages = "\n\n".join(
+        [f"From: {msg['from']}\nSubject: {msg['subject']}\nSnippet: {msg['snippet']}" for msg in messages]
+    )
+
+    # build prompt
+    prompt = "Can you summarize these messages briefly:\n" + combined_messages
+
+    summary = summarize_with_gemini(prompt)
+    return {"summarization": summary}
+
+    

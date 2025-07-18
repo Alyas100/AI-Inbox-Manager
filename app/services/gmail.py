@@ -16,7 +16,7 @@ def fetch_gmail_messages(access_token, refresh_token=None):
     service = build('gmail', 'v1', credentials=creds)
     
     # Get the latest 10 messages
-    response = service.users().messages().list(userId='me', maxResults=10).execute()
+    response = service.users().messages().list(userId='me', maxResults=5).execute()
     messages_ids = response.get('messages', [])
 
     messages = []
