@@ -21,3 +21,6 @@ itsdangerous==2.1.2
 
 # loading .env
 python-dotenv
+
+# for parsing
+bs4

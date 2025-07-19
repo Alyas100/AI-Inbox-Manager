@@ -63,13 +63,26 @@ def summarize_emails():
 
     # Format the emails into a string Gemini can summarize
     combined_messages = "\n\n".join(
-        [f"From: {msg['from']}\nSubject: {msg['subject']}\nSnippet: {msg['snippet']}" for msg in messages]
+        [f"From: {msg['from']}\nSubject: {msg['subject']}\nSnippet: {msg['body']}" for msg in messages]
     )
 
-    # build prompt
-    prompt = "Can you summarize these messages briefly:\n" + combined_messages
+    prompt = (
+        "Summarize the following email messages in **valid JSON** only. "
+        "Your response must be a JSON object, not a string. "
+        "Example:\n"
+        "{\n"
+        '  "summarization": {\n'
+        '    "Sender A": [ "• point1", "• point2" ],\n'
+        '    "Sender B": [ "• point1" ]\n'
+        "  }\n"
+        "}\n\n"
+        "Now summarize:\n\n"
+        + combined_messages
+    )
 
     summary = summarize_with_gemini(prompt)
     return {"summarization": summary}
+
+
 
     
