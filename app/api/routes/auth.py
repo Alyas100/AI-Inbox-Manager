@@ -84,5 +84,44 @@ def summarize_emails():
     return {"summarization": summary}
 
 
+# endpoint that comprise of full process that combine getting emails from db and to return the summarized body
+@router.get("/emails/full-process")
+async def full_email_process(request: Request):
+    # Step 1: Login and Auth handled separately (session already exists)
+    email = get_user_email()
+
+    if not email:
+        return {"error": "User not authenticated or email not found."}
+
+    # Step 2: Fetch Emails
+    messages = get_emails_for_user(email)
+
+    # Step 3: Summarize
+    combined_messages = "\n\n".join(
+        [f"From: {msg['from']}\nSubject: {msg['subject']}\nSnippet: {msg['body']}" for msg in messages]
+    )
+
+    prompt = (
+        "Summarize the following email messages in **valid JSON** only. "
+        "Your response must be a JSON object, not a string. "
+        "Example:\n"
+        "{\n"
+        '  "summarization": {\n'
+        '    "Sender A": [ "• point1", "• point2" ],\n'
+        '    "Sender B": [ "• point1" ]\n'
+        "  }\n"
+        "}\n\n"
+        "Now summarize:\n\n"
+        + combined_messages
+    )
+
+    summary = summarize_with_gemini(prompt)
+
+    return {
+        "email": email,
+        "total_fetched": len(messages),
+        "summarization": summary
+    }
+
 
     
