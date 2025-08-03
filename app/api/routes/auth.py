@@ -1,9 +1,12 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request  # request can't make http request to external api
 from starlette.responses import RedirectResponse
 from app.services.oauth import oauth
 from app.services.email_service import get_emails_for_user
 from app.services.gemini import summarize_with_gemini
 import sqlite3
+
+from app.services.save_email_toDb import save_fetched_emails_to_db
+from test_db import save_or_update_user
 
 
 
@@ -11,11 +14,11 @@ router = APIRouter()
 
 
 # function to retrieve user emailthat stored in db
-def get_user_email(user_id: int = 2):
+def get_user_email(user_id: int = 1):
     conn = sqlite3.connect("test.db")  
     cursor = conn.cursor()
 
-    cursor.execute("SELECT email FROM users WHERE id = ?", (user_id,))  # Or use WHERE if multiple users
+    cursor.execute("SELECT email FROM users WHERE id = ?", (user_id,)) 
     row = cursor.fetchone()
 
     conn.close()
@@ -27,23 +30,24 @@ async def login(request: Request):
     redirect_uri = request.url_for("auth_callback")
     # use access_type to get refresh token everytime, not just on first login
     # use prompt consent for login popup to appear everytime this endpoint is hit
-    return await oauth.google.authorize_redirect(request, redirect_uri, access_type="offline", prompt="consent")
+    return await oauth.google.authorize_redirect(request, redirect_uri, access_type="offline", prompt="select_account")
 
 
 @router.get("/auth/google/callback", name="auth_callback")
 async def auth_callback(request: Request):
     token = await oauth.google.authorize_access_token(request)
-    print("RAW TOKEN DICT:", token)      # ← see what keys you have
+    user_info = token.get("userinfo", {})
 
+    # Dynamically save user login details to DB
+    user = save_or_update_user(
+        email=user_info["email"],
+        access_token=token["access_token"],
+        refresh_token=token.get("refresh_token")
+    )
 
-    # Use userinfo directly from token response
-    user_info = token.get('userinfo', {})
+    print("User saved:", user["email"])
+    return {"message": "Login successful", "email": user["email"]}
     
-    # Debug print (remove in prod)s
-    print("Logged in user:", user_info)
-    
-    return {"email": user_info["email"], "name": user_info["name"], "token": token}
-
 
 # LATER: do function to use the refresh token to request again access token after the access token expired
 
@@ -53,7 +57,9 @@ async def auth_callback(request: Request):
 def test_fetch_emails():
     email = get_user_email()
     messages = get_emails_for_user(email)
-    return {"messages": messages}
+    # save email to db
+    save_fetched_emails_to_db(email, messages)
+    return {"message": f"Fetched and saved {len(messages)} emails"}
 
 
 @router.get("/summarize-emails")

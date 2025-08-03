@@ -6,3 +6,9 @@ __pycache__/
 # environments
 .env
 venv/
+
+# database
+test.db
+
+# temp, later remove back from this
+README.md

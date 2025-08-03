@@ -1,5 +1,7 @@
 from sqlalchemy import Column, String, Integer
 from app.core.database import Base
+from sqlalchemy.orm import relationship
+
 
 class User(Base):
     __tablename__ = "users"
@@ -7,3 +9,6 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     access_token = Column(String)
     refresh_token = Column(String)
+
+    emails = relationship("EmailMessage", back_populates="user")
+
