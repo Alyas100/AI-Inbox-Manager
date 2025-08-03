@@ -6,6 +6,7 @@ from app.services.gemini import summarize_with_gemini
 import sqlite3
 
 from app.services.save_email_toDb import save_fetched_emails_to_db
+from app.tasks import fetch_and_store_emails
 from test_db import save_or_update_user
 
 
@@ -30,7 +31,8 @@ async def login(request: Request):
     redirect_uri = request.url_for("auth_callback")
     # use access_type to get refresh token everytime, not just on first login
     # use prompt consent for login popup to appear everytime this endpoint is hit
-    return await oauth.google.authorize_redirect(request, redirect_uri, access_type="offline", prompt="select_account")
+    return await oauth.google.authorize_redirect(request, redirect_uri, access_type="offline", prompt='consent')
+
 
 
 @router.get("/auth/google/callback", name="auth_callback")
@@ -49,17 +51,17 @@ async def auth_callback(request: Request):
     return {"message": "Login successful", "email": user["email"]}
     
 
-# LATER: do function to use the refresh token to request again access token after the access token expired
 
 
-#testing api func to fetch email 
-@router.get("/test-fetch-emails")
-def test_fetch_emails():
+# fetch email using celery (background worker)
+@router.get("/emails/fetch")
+def fetch_emails_background():
     email = get_user_email()
-    messages = get_emails_for_user(email)
-    # save email to db
-    save_fetched_emails_to_db(email, messages)
-    return {"message": f"Fetched and saved {len(messages)} emails"}
+
+    # Trigger background task
+    task = fetch_and_store_emails.delay(email)
+
+    return {"message": "Emails are being fetched in background", "task_id": task.id}
 
 
 @router.get("/summarize-emails")

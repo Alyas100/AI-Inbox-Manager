@@ -1,6 +1,8 @@
 from sqlalchemy import Column, String, Integer
 from app.core.database import Base
 from sqlalchemy.orm import relationship
+from app.models.email import EmailMessage 
+
 
 
 class User(Base):
