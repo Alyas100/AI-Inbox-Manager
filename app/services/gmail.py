@@ -5,6 +5,10 @@ import base64 # for ascii safe encoding
 from bs4 import BeautifulSoup # parse html into a parse tree, then easily extract data
 import re # regex
 import html # to unescape HTML entities
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def decode_bytes(data):
     for encoding in ['utf-8', 'windows-1252', 'iso-8859-1']:
@@ -67,8 +71,8 @@ def extract_body(payload):
 def fetch_gmail_messages(access_token, refresh_token=None):
     creds = Credentials(
         token=access_token,
-        client_id="555750767356-olt7uoudaj1v4jfs42a8i6p8r9m1m0r9.apps.googleusercontent.com",
-        client_secret="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",
+        client_id=os.getenv("GOOGLE_CLIENT_ID"),
+        client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
         refresh_token=refresh_token,
         token_uri="https://oauth2.googleapis.com/token"
         )

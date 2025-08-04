@@ -13,8 +13,10 @@ load_dotenv()
 app = FastAPI()
 
 # add session middleware
-app.add_middleware(SessionMiddleware, secret_key="1fa234f316c9a47506a6a422b43d928e687584396af8ac56ab3156f6d5135389")
-
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=os.getenv("SESSION_SECRET_KEY")
+)
 
 app.include_router(auth_router)
 

@@ -1,0 +1,5 @@
+# to scan and remove any secrets leaked in code or commit history
+detect-secrets
+
+# this is better to scan if there any secrets in git history commits than the above one
+trufflehog
