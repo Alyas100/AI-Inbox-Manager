@@ -1,0 +1,487 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyOiNUnIf0K+UNxcVhvlw5au",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/Alyas100/AI-Inbox-Manager/blob/master/linear_neuron_tutorial\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "##Single linear neuron/perceptron without activation and hidden layer\n",
+        "\n",
+        "Input (x) -> Linear neuron: y = w*x  -> Output (y_pred)\n"
+      ],
+      "metadata": {
+        "id": "Y-84tcepgKgW"
+      }
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "YL0FU3Hjf_5I"
+      },
+      "outputs": [],
+      "source": [
+        "import random\n",
+        "\n",
+        "x=2\n",
+        "label=17\n",
+        "l_r=0.1 #learning rate for not overshoot or very slow progress\n",
+        "w=random.uniform(-1.0, 1.0) #random weight\n",
+        "\n",
+        "for i in range(1000):\n",
+        "    #multiply weight with input\n",
+        "    y_pred=w*x\n",
+        "\n",
+        "    #compute the loss\n",
+        "    loss=(y_pred-label)**2\n",
+        "\n",
+        "    #backpropagation (applying power rule for each to form a chain rule)\n",
+        "    #find dl(loss)/dw(weight), so need to find:\n",
+        "    #dl/dy_pred*dy/dy_pred\n",
+        "    #general chain rule formula is:\n",
+        "    #dl/dw=dl/(dy_pred)*(dy_pred/dw)\n",
+        "    #result is below\n",
+        "    slope = 2 * (y_pred - label) * x\n",
+        "\n",
+        "    #gradient descent\n",
+        "    #this update new weight(that optmize to get closer to 'label' value)\n",
+        "    #the updated weight should be closer or get to label value over time\n",
+        "    #adjust the learning parameter to experiment on how long or fast to converge on more complex input and weight\n",
+        "    w=w-l_r*slope\n",
+        "\n",
+        "    print(w)\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "to check what true weight for satisfying the label value, calculate below:\n",
+        "-we first find rate of change of loss w.r.t weight where the value of slope is 0, means the optimal one for weight in order for equal to the value of target/label, when this weight multiplied with x(input).\n",
+        "\n",
+        "dL/dw​=2(w×x−y)×x=0\n",
+        "\n",
+        "then, divide both side by 2, and use zero product property(A*B=0, so A=0 and B=0):\n",
+        "\n",
+        "case 1: 2(w×x−y)=0\n",
+        "case 2: x=0\n",
+        "\n",
+        "solve:\n",
+        "\n",
+        "c1:w = y/x\n",
+        "and for c2, its depending on the value of x itself on beginning, if it is 0, then it will always become true(which is 0) regardless of any weight value\n",
+        "\n",
+        "-in this case the x is 2, so plug in to y/x:\n",
+        "w=y/x (which is the value of weight needed to get optimum target)\n",
+        "\n"
+      ],
+      "metadata": {
+        "id": "DdizDZ--mED0"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "## Neural Network incorporating 2 hidden layer, with activation function(ReLu) and biases"
+      ],
+      "metadata": {
+        "id": "_cMHKIfJhfdQ"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "FLOW:\n",
+        "x (input)-> Layer 1(ReLu)-> Layer 2(ReLu)-> output(no activation)-> y_pred\n"
+      ],
+      "metadata": {
+        "id": "WZ7QRr1M9nUH"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import random\n",
+        "\n",
+        "#Data\n",
+        "x = 2.0\n",
+        "target = 17.0\n",
+        "\n",
+        "#Hyperparameters\n",
+        "lr = 0.01 #learning rate\n",
+        "epochs = 10000 #act as cycle on how many time to iterate for finding closer to target value\n",
+        "\n",
+        "#Initialize weights and biases for weight 1-3\n",
+        "w1 = random.uniform(-1, 1)\n",
+        "b1 = random.uniform(-1, 1)\n",
+        "\n",
+        "w2 = random.uniform(-1, 1)\n",
+        "b2 = random.uniform(-1, 1)\n",
+        "\n",
+        "w3 = random.uniform(-1, 1)\n",
+        "b3 = random.uniform(-1, 1)\n",
+        "\n",
+        "#ReLU activation\n",
+        "#is CRUCIAL for model to learn complex pattern(non-linear) instead of just linear pattern\n",
+        "#omitting this will result into multiple layer that have defined to collapse into one quivalent linear layer only\n",
+        "def relu(x):\n",
+        "    return x if x > 0 else 0\n",
+        "\n",
+        "#slope for y=x in relu fucn is 1, and 0 for y=0(flat line)\n",
+        "def relu_derivative(x):\n",
+        "    return 1 if x > 0 else 0\n",
+        "\n",
+        "#Training loop\n",
+        "for i in range(epochs):\n",
+        "    #Forward pass (only apply to equation with weight 1 and 2)\n",
+        "    #z stands for input for pre-activation layer\n",
+        "    z1 = w1 * x + b1\n",
+        "    a1 = relu(z1) #inserted into activation layer\n",
+        "\n",
+        "    z2 = w2 * a1 + b2\n",
+        "    a2 = relu(z2)\n",
+        "\n",
+        "    y_pred = w3 * a2 + b3  #output layer (no activation for for this weight)\n",
+        "\n",
+        "    #calculate loss (MSE)\n",
+        "    #mathematical formula in general for all kind of loss function(not necesarily for regression only) is:\n",
+        "    #L=Loss(a2,target) for this case using a2 for previous hidden layer\n",
+        "    #chain of dependecies look like this: x→z1​→a1​→z2​→a2​→L\n",
+        "    loss = (y_pred - target) ** 2\n",
+        "\n",
+        "    # Backpropagation\n",
+        "    dL_dy = 2 * (y_pred - target) #to know how much y_pred should be changed to decrease loss later in grad_decent\n",
+        "    #then we do with respect to last weight for output and for last bias, so we can know how much need to change that will affect loss\n",
+        "    dL_dw3 = dL_dy * a2 #a2 is after differnetiated (dy/dw3)\n",
+        "    dL_db3 = dL_dy #with respect to bias,in this case dy/db is 1, this also means that increasing b by 1 increases y_pred by one too directly\n",
+        "\n",
+        "    #find the derivative for the two previous (weight 1, and 2)\n",
+        "    #same as previous, the order must always be from w.r.t output in current layer, weight and biases cause these are the core thing we want to see how many changes needed to alter the loss. But these two hidden layer below have one addition derivative that need to find, which are z2(before applying ReLU).\n",
+        "    dL_da2 = dL_dy * w3\n",
+        "    dL_dz2 = dL_da2 * relu_derivative(z2)\n",
+        "    dL_dw2 = dL_dz2 * a1\n",
+        "    dL_db2 = dL_dz2\n",
+        "\n",
+        "    dL_da1 = dL_dz2 * w2\n",
+        "    dL_dz1 = dL_da1 * relu_derivative(z1)\n",
+        "    dL_dw1 = dL_dz1 * x\n",
+        "    dL_db1 = dL_dz1\n",
+        "\n",
+        "    # Gradient update for all these three weights\n",
+        "    w3 -= lr * dL_dw3\n",
+        "    b3 -= lr * dL_db3\n",
+        "\n",
+        "    w2 -= lr * dL_dw2\n",
+        "    b2 -= lr * dL_db2\n",
+        "\n",
+        "    w1 -= lr * dL_dw1\n",
+        "    b1 -= lr * dL_db1\n",
+        "\n",
+        "    # to see how close to optimal value '17.0'\n",
+        "    print(y_pred)\n",
+        "\n"
+      ],
+      "metadata": {
+        "id": "u-gaqGlAqCK-"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "## predicting house price using 3 feature input, and two hidden layer(each contain 3 neuron), and output layer contain 1 neuron, that receice three inputs from output of its previous hidden layer"
+      ],
+      "metadata": {
+        "id": "W9WEk2cjWHZ9"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import random\n",
+        "\n",
+        "# --- Input and Target ---\n",
+        "x1, x2, x3 = 120.0, 3.0, 10.0   # [size, bedrooms, age]\n",
+        "target = 300000.0               # house price\n",
+        "\n",
+        "# --- Hyperparameters ---\n",
+        "lr = 0.01\n",
+        "epochs = 10000\n",
+        "\n",
+        "# --- Helper function ---\n",
+        "def rand():\n",
+        "    return random.uniform(-1, 1)\n",
+        "\n",
+        "# --- Initialize weights and biases manually ---\n",
+        "# Hidden Layer 1 (3 neurons, 3 inputs each)\n",
+        "w1_1 = [rand(), rand(), rand()]\n",
+        "w1_2 = [rand(), rand(), rand()]\n",
+        "w1_3 = [rand(), rand(), rand()]\n",
+        "b1_1, b1_2, b1_3 = rand(), rand(), rand()\n",
+        "\n",
+        "# Hidden Layer 2 (3 neurons, 3 inputs each)\n",
+        "w2_1 = [rand(), rand(), rand()]\n",
+        "w2_2 = [rand(), rand(), rand()]\n",
+        "w2_3 = [rand(), rand(), rand()]\n",
+        "b2_1, b2_2, b2_3 = rand(), rand(), rand()\n",
+        "\n",
+        "# Output Layer (1 neuron, 3 inputs)\n",
+        "w3 = [rand(), rand(), rand()]\n",
+        "b3 = rand()\n",
+        "\n",
+        "# --- Activation functions ---\n",
+        "def relu(x):\n",
+        "    return x if x > 0 else 0\n",
+        "\n",
+        "def relu_deriv(x):\n",
+        "    return 1 if x > 0 else 0\n",
+        "\n",
+        "# --- Training loop ---\n",
+        "for epoch in range(epochs):\n",
+        "\n",
+        "    # --- Forward Pass ---\n",
+        "    # Hidden Layer 1\n",
+        "    z1_1 = w1_1[0]*x1 + w1_1[1]*x2 + w1_1[2]*x3 + b1_1\n",
+        "    z1_2 = w1_2[0]*x1 + w1_2[1]*x2 + w1_2[2]*x3 + b1_2\n",
+        "    z1_3 = w1_3[0]*x1 + w1_3[1]*x2 + w1_3[2]*x3 + b1_3\n",
+        "    a1_1, a1_2, a1_3 = relu(z1_1), relu(z1_2), relu(z1_3)\n",
+        "\n",
+        "    # Hidden Layer 2\n",
+        "    z2_1 = w2_1[0]*a1_1 + w2_1[1]*a1_2 + w2_1[2]*a1_3 + b2_1\n",
+        "    z2_2 = w2_2[0]*a1_1 + w2_2[1]*a1_2 + w2_2[2]*a1_3 + b2_2\n",
+        "    z2_3 = w2_3[0]*a1_1 + w2_3[1]*a1_2 + w2_3[2]*a1_3 + b2_3\n",
+        "    a2_1, a2_2, a2_3 = relu(z2_1), relu(z2_2), relu(z2_3)\n",
+        "\n",
+        "    # Output Layer\n",
+        "    y_pred = w3[0]*a2_1 + w3[1]*a2_2 + w3[2]*a2_3 + b3\n",
+        "\n",
+        "    # --- Loss ---\n",
+        "    loss = (y_pred - target) ** 2\n",
+        "\n",
+        "    # --- Backpropagation ---\n",
+        "    dL_dy = 2 * (y_pred - target)\n",
+        "\n",
+        "    # Output layer gradients\n",
+        "    dL_dw3_0 = dL_dy * a2_1\n",
+        "    dL_dw3_1 = dL_dy * a2_2\n",
+        "    dL_dw3_2 = dL_dy * a2_3\n",
+        "    dL_db3 = dL_dy\n",
+        "\n",
+        "    # Hidden layer 2\n",
+        "    dL_da2_1 = dL_dy * w3[0]\n",
+        "    dL_da2_2 = dL_dy * w3[1]\n",
+        "    dL_da2_3 = dL_dy * w3[2]\n",
+        "\n",
+        "    dL_dz2_1 = dL_da2_1 * relu_deriv(z2_1)\n",
+        "    dL_dz2_2 = dL_da2_2 * relu_deriv(z2_2)\n",
+        "    dL_dz2_3 = dL_da2_3 * relu_deriv(z2_3)\n",
+        "\n",
+        "    # Gradients for w2\n",
+        "    dL_dw2_1 = [dL_dz2_1 * a1_1, dL_dz2_1 * a1_2, dL_dz2_1 * a1_3]\n",
+        "    dL_dw2_2 = [dL_dz2_2 * a1_1, dL_dz2_2 * a1_2, dL_dz2_2 * a1_3]\n",
+        "    dL_dw2_3 = [dL_dz2_3 * a1_1, dL_dz2_3 * a1_2, dL_dz2_3 * a1_3]\n",
+        "    dL_db2_1, dL_db2_2, dL_db2_3 = dL_dz2_1, dL_dz2_2, dL_dz2_3\n",
+        "\n",
+        "    # Hidden layer 1\n",
+        "    dL_da1_1 = dL_dz2_1*w2_1[0] + dL_dz2_2*w2_2[0] + dL_dz2_3*w2_3[0]\n",
+        "    dL_da1_2 = dL_dz2_1*w2_1[1] + dL_dz2_2*w2_2[1] + dL_dz2_3*w2_3[1]\n",
+        "    dL_da1_3 = dL_dz2_1*w2_1[2] + dL_dz2_2*w2_2[2] + dL_dz2_3*w2_3[2]\n",
+        "\n",
+        "    dL_dz1_1 = dL_da1_1 * relu_deriv(z1_1)\n",
+        "    dL_dz1_2 = dL_da1_2 * relu_deriv(z1_2)\n",
+        "    dL_dz1_3 = dL_da1_3 * relu_deriv(z1_3)\n",
+        "\n",
+        "    dL_dw1_1 = [dL_dz1_1 * x1, dL_dz1_1 * x2, dL_dz1_1 * x3]\n",
+        "    dL_dw1_2 = [dL_dz1_2 * x1, dL_dz1_2 * x2, dL_dz1_2 * x3]\n",
+        "    dL_dw1_3 = [dL_dz1_3 * x1, dL_dz1_3 * x2, dL_dz1_3 * x3]\n",
+        "    dL_db1_1, dL_db1_2, dL_db1_3 = dL_dz1_1, dL_dz1_2, dL_dz1_3\n",
+        "\n",
+        "    # --- Update weights ---\n",
+        "    # Output layer\n",
+        "    w3[0] -= lr * dL_dw3_0\n",
+        "    w3[1] -= lr * dL_dw3_1\n",
+        "    w3[2] -= lr * dL_dw3_2\n",
+        "    b3 -= lr * dL_db3\n",
+        "\n",
+        "    # Hidden layer 2\n",
+        "    for i in range(3):\n",
+        "        w2_1[i] -= lr * dL_dw2_1[i]\n",
+        "        w2_2[i] -= lr * dL_dw2_2[i]\n",
+        "        w2_3[i] -= lr * dL_dw2_3[i]\n",
+        "    b2_1 -= lr * dL_db2_1\n",
+        "    b2_2 -= lr * dL_db2_2\n",
+        "    b2_3 -= lr * dL_db2_3\n",
+        "\n",
+        "    # Hidden layer 1\n",
+        "    for i in range(3):\n",
+        "        w1_1[i] -= lr * dL_dw1_1[i]\n",
+        "        w1_2[i] -= lr * dL_dw1_2[i]\n",
+        "        w1_3[i] -= lr * dL_dw1_3[i]\n",
+        "    b1_1 -= lr * dL_db1_1\n",
+        "    b1_2 -= lr * dL_db1_2\n",
+        "    b1_3 -= lr * dL_db1_3\n",
+        "\n",
+        "    if epoch % 1000 == 0:\n",
+        "        print(f\"Epoch {epoch}: Predicted={y_pred:.2f}, Loss={loss:.2f}\")\n",
+        "\n",
+        "# --- Final Output ---\n",
+        "print(\"\\nFinal Prediction:\", y_pred)\n",
+        "print(\"Target:\", target)\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "KSO0MUOqWPzA",
+        "outputId": "cf86277e-6e30-4f48-d1f7-9008f0c8de38"
+      },
+      "execution_count": 5,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Epoch 0: Predicted=19.15, Loss=89988511403.93\n",
+            "Epoch 1000: Predicted=-36430631.30, Loss=1349139275628122.25\n",
+            "Epoch 2000: Predicted=299999.94, Loss=0.00\n",
+            "Epoch 3000: Predicted=300000.00, Loss=0.00\n",
+            "Epoch 4000: Predicted=300000.00, Loss=0.00\n",
+            "Epoch 5000: Predicted=300000.00, Loss=0.00\n",
+            "Epoch 6000: Predicted=300000.00, Loss=0.00\n",
+            "Epoch 7000: Predicted=300000.00, Loss=0.00\n",
+            "Epoch 8000: Predicted=300000.00, Loss=0.00\n",
+            "Epoch 9000: Predicted=300000.00, Loss=0.00\n",
+            "\n",
+            "Final Prediction: 299999.9999999986\n",
+            "Target: 300000.0\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "## Implementing the code above using library (pytorch)"
+      ],
+      "metadata": {
+        "id": "BgHH0SoYlElB"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import torch\n",
+        "import torch.nn as nn\n",
+        "import torch.optim as optim\n",
+        "\n",
+        "# --- Data (inputs & target) ---\n",
+        "# size, bedrooms, age\n",
+        "x = torch.tensor([[120.0, 3.0, 10.0]])   # shape: (1, 3)\n",
+        "y_true = torch.tensor([[300000.0]])      # shape: (1, 1)\n",
+        "\n",
+        "# --- Define the neural network ---\n",
+        "class HousePriceNN(nn.Module):\n",
+        "    def __init__(self):\n",
+        "        super(HousePriceNN, self).__init__()\n",
+        "        self.layer1 = nn.Linear(3, 3)  # input layer → hidden layer 1 (3 neurons)\n",
+        "        self.layer2 = nn.Linear(3, 3)  # hidden layer 1 → hidden layer 2 (3 neurons)\n",
+        "        self.output = nn.Linear(3, 1)  # hidden layer 2 → output (1 neuron)\n",
+        "        self.relu = nn.ReLU()          # activation function\n",
+        "\n",
+        "    def forward(self, x):\n",
+        "        x = self.relu(self.layer1(x))\n",
+        "        x = self.relu(self.layer2(x))\n",
+        "        x = self.output(x)\n",
+        "        return x\n",
+        "\n",
+        "# --- Initialize model ---\n",
+        "model = HousePriceNN()\n",
+        "\n",
+        "# --- Loss and optimizer ---\n",
+        "criterion = nn.MSELoss()                # Mean Squared Error\n",
+        "optimizer = optim.SGD(model.parameters(), lr=0.001)\n",
+        "\n",
+        "# --- Training loop ---\n",
+        "epochs = 10000\n",
+        "for epoch in range(epochs):\n",
+        "    # Forward pass\n",
+        "    y_pred = model(x)\n",
+        "    loss = criterion(y_pred, y_true)\n",
+        "\n",
+        "    # Backward pass\n",
+        "    optimizer.zero_grad()\n",
+        "    loss.backward()\n",
+        "    optimizer.step()\n",
+        "\n",
+        "    if epoch % 1000 == 0:\n",
+        "        print(f\"Epoch {epoch}: Predicted={y_pred.item():.2f}, Loss={loss.item():.2f}\")\n",
+        "\n",
+        "# --- Final result ---\n",
+        "print(\"\\nFinal Prediction:\", y_pred.item())\n",
+        "print(\"Target:\", y_true.item())\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "1AEEEWyBlK3j",
+        "outputId": "42e79201-20d9-47c2-c8cf-25f8ecfe7887"
+      },
+      "execution_count": 6,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Epoch 0: Predicted=-0.25, Loss=90000146432.00\n",
+            "Epoch 1000: Predicted=259480.77, Loss=1641808384.00\n",
+            "Epoch 2000: Predicted=294527.09, Loss=29952702.00\n",
+            "Epoch 3000: Predicted=299260.78, Loss=546444.38\n",
+            "Epoch 4000: Predicted=299900.16, Loss=9968.77\n",
+            "Epoch 5000: Predicted=299985.50, Loss=210.25\n",
+            "Epoch 6000: Predicted=299992.22, Loss=60.55\n",
+            "Epoch 7000: Predicted=299992.22, Loss=60.55\n",
+            "Epoch 8000: Predicted=299992.22, Loss=60.55\n",
+            "Epoch 9000: Predicted=299992.22, Loss=60.55\n",
+            "\n",
+            "Final Prediction: 299992.21875\n",
+            "Target: 300000.0\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [],
+      "metadata": {
+        "id": "rugjNeSvJFMA"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
